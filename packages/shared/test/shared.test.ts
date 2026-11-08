@@ -100,3 +100,10 @@ test('pontuação de ranking fica entre 0 e 100 e níveis', () => {
   assert.equal(level({ rating: 4.9, reviewCount: 30, bookings12m: 30, cancelRate: 0, rehireRate: 0.4, responseRate: 0.95, incidents: 0, hasMentorshipSeal: true }), 'elite');
   assert.equal(level({ rating: 4.9, reviewCount: 30, bookings12m: 30, cancelRate: 0, rehireRate: 0.4, responseRate: 0.95, incidents: 0, hasMentorshipSeal: false }), 'ouro');
 });
+
+test('cópia do bloqueio de contato nas funções está igual ao original', async () => {
+  const fs = await import('node:fs');
+  const orig = fs.readFileSync(new URL('../src/contactGuard.ts', import.meta.url), 'utf8');
+  const copy = fs.readFileSync(new URL('../../../supabase/functions/_shared/contactGuard.ts', import.meta.url), 'utf8');
+  assert.ok(copy.endsWith(orig), 'rode npm run sync em packages/shared');
+});

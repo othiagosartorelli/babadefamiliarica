@@ -5,6 +5,7 @@
   "type": "module",
   "main": "src/index.ts",
   "scripts": {
-    "test": "node --test test/*.test.ts"
+    "test": "node --test test/*.test.ts",
+    "sync": "node -e \"const fs=require('fs');const s=fs.readFileSync('src/contactGuard.ts','utf8');fs.writeFileSync('../../supabase/functions/_shared/contactGuard.ts','// CÓPIA de packages/shared/src/contactGuard.ts (as funções só publicam arquivos desta pasta).\\n// Não edite aqui: edite o original e rode \\'npm run sync\\' em packages/shared. Um teste confere se são iguais.\\n'+s)\""
   }
 }

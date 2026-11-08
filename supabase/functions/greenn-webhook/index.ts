@@ -36,7 +36,11 @@ Deno.serve(async (req) => {
   const db = adminClient();
   const eventKey = `${saleId}:${rawStatus}`;
   const { error: dupErr } = await db.from('greenn_events').insert({ event_key: eventKey, event_type: rawStatus, payload });
-  if (dupErr) return json({ ok: true, duplicate: true }); // já processado
+  if (dupErr) {
+    if (dupErr.code === '23505') return json({ ok: true, duplicate: true }); // já processado
+    console.error('greenn_events insert', dupErr);
+    return json({ error: 'falha ao registrar evento' }, 500); // a Greenn tenta de novo
+  }
 
   const mentoriaProduct = Deno.env.get('GREENN_MENTORIA_PRODUCT_ID');
   if (mentoriaProduct && productId && productId !== mentoriaProduct) {
