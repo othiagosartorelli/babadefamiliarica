@@ -46,6 +46,17 @@ body {
 
 h1,
 h2,
+h3,
+.sidebar-title,
+.stat-value,
+.empty-title,
+.appeal-name {
+  font-variant-numeric: lining-nums;
+  font-feature-settings: "lnum" 1;
+}
+
+h1,
+h2,
 h3 {
   font-family: var(--font-title-stack);
   font-weight: 600;
@@ -240,26 +251,39 @@ input[aria-invalid="true"] {
   border-color: var(--error);
 }
 
-input[type="file"] {
-  min-height: 48px;
-  padding: 10px 12px;
+.label {
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.file-pick {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex-wrap: wrap;
+  padding: 10px;
   border: 1px dashed var(--line-strong);
   border-radius: var(--radius-sm);
   background: var(--ivory);
-  width: 100%;
-  max-width: 100%;
 }
 
-input[type="file"]::file-selector-button {
-  font: inherit;
-  font-weight: 600;
-  border: 0;
-  border-radius: 999px;
-  padding: 8px 16px;
-  margin-right: 12px;
-  background: var(--nude);
-  color: var(--ink);
-  cursor: pointer;
+.file-pick:focus-within {
+  border-color: var(--plum);
+  box-shadow: 0 0 0 3px rgba(91, 42, 69, 0.14);
+}
+
+.file-name {
+  color: var(--muted);
+  font-size: 14px;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.count {
+  font-family: var(--font-body-stack);
+  font-size: 16px;
+  font-weight: 500;
+  color: var(--muted);
 }
 
 .form-error {
@@ -520,6 +544,7 @@ input[type="file"]::file-selector-button {
   min-height: 100vh;
   display: grid;
   grid-template-columns: 264px minmax(0, 1fr);
+  background: linear-gradient(to right, var(--rose) 264px, var(--ivory) 264px);
 }
 
 .sidebar {
@@ -546,8 +571,9 @@ input[type="file"]::file-selector-button {
   margin: 0;
   font-family: var(--font-title-stack);
   font-weight: 600;
-  font-size: 20px;
+  font-size: 19px;
   line-height: 1.15;
+  white-space: nowrap;
 }
 
 .sidebar-sub {
@@ -608,7 +634,7 @@ input[type="file"]::file-selector-button {
 
 .content {
   padding: 48px 56px 80px;
-  max-width: 1240px;
+  max-width: 1320px;
   width: 100%;
 }
 
@@ -806,7 +832,7 @@ input[type="file"]::file-selector-button {
   border: 1px solid var(--line);
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow);
-  overflow: hidden;
+  overflow-x: auto;
 }
 
 .table {
@@ -815,19 +841,20 @@ input[type="file"]::file-selector-button {
 }
 
 .table th {
+  white-space: nowrap;
   text-align: left;
   font-size: 12px;
   font-weight: 600;
   letter-spacing: 0.06em;
   text-transform: uppercase;
   color: var(--muted);
-  padding: 16px 20px;
+  padding: 16px 16px;
   background: var(--ivory);
   border-bottom: 1px solid var(--line);
 }
 
 .table td {
-  padding: 16px 20px;
+  padding: 16px 16px;
   border-bottom: 1px solid var(--line);
   vertical-align: middle;
 }
@@ -866,7 +893,7 @@ input[type="file"]::file-selector-button {
 }
 
 .cell-actions .row-actions {
-  min-width: 260px;
+  min-width: 200px;
 }
 
 .form .row-actions,
@@ -1024,6 +1051,7 @@ input[type="file"]::file-selector-button {
 @media (max-width: 860px) {
   .shell {
     display: block;
+    background: var(--ivory);
   }
 
   .sidebar {
@@ -1160,6 +1188,7 @@ input[type="file"]::file-selector-button {
 
   .table td[data-label]::before {
     content: attr(data-label);
+    font-family: var(--font-body-stack);
     font-size: 13px;
     font-weight: 500;
     color: var(--muted);
@@ -1228,12 +1257,13 @@ input[type="file"]::file-selector-button {
     font-size: 30px;
   }
 
-  .stat-grid {
-    grid-template-columns: minmax(0, 1fr);
+  .stat-card {
+    padding: 16px;
+    min-height: 0;
   }
 
-  .stat-card {
-    min-height: 0;
+  .stat-value {
+    font-size: 36px;
   }
 }
 

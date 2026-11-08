@@ -57,6 +57,7 @@ async function loadAll(): Promise<{ seals: SealRow[]; pending: PendingRow[] }> {
 
 export function Seals() {
   const { data, error, loading, reload } = useData(loadAll);
+  const activeCount = data ? data.seals.filter((s) => s.active).length : 0;
 
   return (
     <>
@@ -77,7 +78,12 @@ export function Seals() {
 
       {data ? (
         <>
-          <h2 className="section-title section-gap">Selos ({data.seals.filter((s) => s.active).length} ativos)</h2>
+          <h2 className="section-title section-gap">
+            Selos{" "}
+            <span className="count">
+              ({activeCount} {activeCount === 1 ? "ativo" : "ativos"})
+            </span>
+          </h2>
           {data.seals.length === 0 ? (
             <EmptyState title="Nenhum selo ainda">Os selos aparecem aqui quando uma compra for confirmada ou quando você ligar um à mão.</EmptyState>
           ) : (
@@ -117,7 +123,9 @@ export function Seals() {
             </div>
           )}
 
-          <h2 className="section-title section-gap">Compras sem cadastro ({data.pending.length})</h2>
+          <h2 className="section-title section-gap">
+            Compras sem cadastro <span className="count">({data.pending.length})</span>
+          </h2>
           {data.pending.length === 0 ? (
             <EmptyState title="Nenhuma compra esperando">Todas as compras da Greenn já estão ligadas a uma babá cadastrada.</EmptyState>
           ) : (

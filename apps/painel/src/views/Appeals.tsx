@@ -5,7 +5,6 @@ import { getSupabase } from "@/lib/supabase";
 import { formatDateTime } from "@/lib/format";
 import { one, type ModerationAction, type Role } from "@/lib/types";
 import { useData } from "@/lib/useData";
-import { useAuth } from "@/components/AuthProvider";
 import { useActions } from "@/components/useNotice";
 import { Badge, Button, EmptyState, ErrorBox, Loading, Notice, PageHeader } from "@/components/ui";
 
@@ -95,7 +94,6 @@ export function Appeals() {
 function AppealsList({ view }: { view: "abertos" | "decididos" }) {
   const { data, error, loading, reload } = useData(() => loadAppeals(view), view);
   const { notice, clearNotice, busy, run } = useActions();
-  const { user } = useAuth();
   const sb = getSupabase();
 
   async function decide(a: AppealRow, status: "mantido" | "revertido") {
@@ -109,23 +107,8 @@ function AppealsList({ view }: { view: "abertos" | "decididos" }) {
     const ok = await run(
       `${status}-${a.id}`,
       async () => {
-        if (status === "revertido" && a.event) {
-          // Desfaz o efeito antes de fechar o pedido: se falhar, o pedido continua aberto.
-          if (a.event.action === "suspensao") {
-            const { error } = await sb.from("profiles").update({ suspended_until: null }).eq("id", a.user_id);
-            if (error) throw error;
-          } else if (a.event.action === "banimento") {
-            const { error } = await sb.from("profiles").update({ banned_at: null }).eq("id", a.user_id);
-            if (error) throw error;
-          } else if (a.event.action === "avaliacao_removida" && a.event.review_id) {
-            const { error } = await sb.from("nanny_reviews").update({ removed_at: null }).eq("id", a.event.review_id);
-            if (error) throw error;
-          }
-        }
-        const { error } = await sb
-          .from("appeals")
-          .update({ status, decided_by: user?.id ?? null, decided_at: new Date().toISOString() })
-          .eq("id", a.id);
+        // Uma operação só no banco (decide_appeal): desfaz o efeito e fecha o pedido juntos, ou nada muda.
+        const { error } = await sb.rpc("decide_appeal", { p_appeal_id: a.id, p_status: status });
         if (error) throw error;
       },
       status === "mantido" ? `Decisão mantida para ${name}.` : `Decisão revertida para ${name}.`,

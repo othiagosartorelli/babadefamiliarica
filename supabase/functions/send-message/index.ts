@@ -67,6 +67,7 @@ Deno.serve(async (req) => {
       .select('id', { count: 'exact', head: true })
       .eq('user_id', user.id)
       .eq('action', 'mensagem_oculta')
+      .not('reason', 'like', '%(revertido)%')
       .gte('created_at', since);
     const n = (count ?? 0) + 1;
 

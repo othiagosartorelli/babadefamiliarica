@@ -302,17 +302,27 @@ export function Contents() {
           </div>
 
           <div className="field span-2">
-            <label htmlFor="c-video">Vídeo (opcional)</label>
-            <input
-              id="c-video"
-              ref={fileInput}
-              type="file"
-              accept="video/mp4,video/quicktime,video/webm,video/*"
-              onChange={(e) => void onPickFile(e.target.files?.[0] ?? null)}
-            />
+            <span className="label" id="c-video-label">
+              Vídeo (opcional)
+            </span>
+            <div className="file-pick">
+              <input
+                id="c-video"
+                ref={fileInput}
+                className="sr-only"
+                type="file"
+                accept="video/mp4,video/quicktime,video/webm,video/*"
+                aria-labelledby="c-video-label c-video-btn"
+                onChange={(e) => void onPickFile(e.target.files?.[0] ?? null)}
+              />
+              <label htmlFor="c-video" id="c-video-btn" className="btn btn-secondary">
+                {file || form.video_path ? "Trocar vídeo" : "Escolher vídeo"}
+              </label>
+              <span className="file-name">{file ? file.name : form.video_path ? "Vídeo já enviado" : "Nenhum arquivo escolhido"}</span>
+            </div>
             <span className="field-hint">
               {file
-                ? `Selecionado: ${file.name} (${(file.size / 1024 / 1024).toFixed(1)} MB)`
+                ? `${(file.size / 1024 / 1024).toFixed(1).replace(".", ",")} MB. Ele é enviado quando você salvar.`
                 : form.video_path
                   ? "Já tem vídeo. Escolha outro arquivo só se quiser trocar."
                   : "MP4, MOV ou WEBM. A duração é preenchida sozinha."}
