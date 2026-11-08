@@ -1,8 +1,5 @@
 -- Testes das regras de privacidade. Rode depois do stub e das migrações.
 \set ON_ERROR_STOP on
-grant usage on schema public to authenticated;
-grant select, insert, update, delete on all tables in schema public to authenticated;
-grant execute on all functions in schema public to authenticated;
 
 -- Dados: Ana (admin), Carolina (mãe sem premium), Marina (mãe premium), Juliana (babá real), Bia (babá exemplo)
 insert into auth.users values
