@@ -19,14 +19,14 @@ export default function Propostas() {
     <SafeAreaView edges={['top']} style={{ flex: 1, backgroundColor: colors.ivory }}>
       <ScrollView contentContainerStyle={{ padding: 20, gap: 18 }}>
         <View>
-          <Body muted size={14}>Nível Prata · 4,9 · 18 contratações</Body>
-          <Title size={32}>Uma família quer conhecer você</Title>
+          <Title size={32}>Propostas</Title>
+          <Body muted size={14}>Quando uma família chamar você, a proposta aparece aqui. Abaixo, um exemplo de como ela chega.</Body>
         </View>
         <View style={[{ backgroundColor: colors.white, borderRadius: 26, padding: 18, gap: 16 }, shadow]}>
           <View style={{ flexDirection: 'row', gap: 12, alignItems: 'center' }}>
             <View style={{ width: 52, height: 52, borderRadius: 26, backgroundColor: colors.nude, alignItems: 'center', justifyContent: 'center' }}><Title size={22}>C</Title></View>
             <View style={{ gap: 3 }}>
-              <Strong size={17}>Carolina · Jardins</Strong>
+              <Strong size={17}>Exemplo · Carolina · Jardins</Strong>
               <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}><Check size={13} /><Body size={12} style={{ color: colors.green }}>Família verificada</Body></View>
             </View>
           </View>

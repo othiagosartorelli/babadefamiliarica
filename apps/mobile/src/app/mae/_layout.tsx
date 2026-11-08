@@ -1,8 +1,14 @@
-import { Tabs } from 'expo-router';
+import { Redirect, Tabs } from 'expo-router';
+import { homeFor, useAuth } from '@/lib/auth';
 import { TabIcon } from '@/components/TabIcon';
 import { colors, fonts } from '@/theme';
 
 export default function MaeTabs() {
+  const { session, profile, profileReady } = useAuth();
+  if (!session) return <Redirect href="/" />;
+  if (!profileReady) return null;
+  if (!profile) return <Redirect href="/cadastro" />;
+  if (profile.role !== 'mae' && profile.role !== 'admin') return <Redirect href={homeFor(profile.role)} />;
   return (
     <Tabs
       screenOptions={{

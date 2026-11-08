@@ -1,10 +1,9 @@
-// Premium da mãe (R$ 297/ano). A compra real passa pela loja (App Store / Google Play);
-// aqui o modo demonstração só libera a busca completa.
-import { useState } from 'react';
+// Premium da mãe (R$ 297/ano). A compra pela loja (App Store / Google Play) entra no lançamento;
+// na fase de testes, a equipe libera premium de teste pelo painel.
 import { Pressable, ScrollView, View } from 'react-native';
 import { router } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useStore } from '@/lib/store';
+import { useAuth } from '@/lib/auth';
 import { Body, Button, Strong, Title } from '@/components/ui';
 import { Check, Crown } from '@/components/icons';
 import { GoldSurface } from '@/components/Gold';
@@ -17,8 +16,7 @@ const BENEFITS = [
 ];
 
 export default function Premium() {
-  const { setPremium } = useStore();
-  const [done, setDone] = useState(false);
+  const { isPremium, premiumUntil } = useAuth();
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: colors.ivory }}>
       <ScrollView contentContainerStyle={{ padding: 24, gap: 20 }}>
@@ -27,7 +25,14 @@ export default function Premium() {
             <Body size={18}>✕</Body>
           </Pressable>
         </View>
-        {!done ? (
+        {isPremium ? (
+          <View style={{ alignItems: 'center', gap: 14, paddingTop: 40 }}>
+            <GoldSurface width={72} style={{ width: 72, height: 72, borderRadius: 36, alignItems: 'center', justifyContent: 'center' }}><Crown size={30} /></GoldSurface>
+            <Title size={32} style={{ textAlign: 'center' }}>Você é Premium</Title>
+            <Body muted style={{ textAlign: 'center' }}>Válido até {new Date(premiumUntil!).toLocaleDateString('pt-BR')}.</Body>
+            <Button label="Ver as babás" onPress={() => router.back()} />
+          </View>
+        ) : (
           <>
             <Title size={34}>Todas as babás da sua região, a um toque</Title>
             <Body muted>Hoje você vê só os perfis de exemplo.</Body>
@@ -41,16 +46,9 @@ export default function Premium() {
               <View><Strong size={16}>Anual</Strong><Body muted size={13}>cerca de R$ 24,75 por mês</Body></View>
               <Strong size={22}>R$ 297/ano</Strong>
             </View>
-            <Button label="Assinar o Premium" onPress={() => { setPremium(true); setDone(true); }} />
-            <Body muted size={12} style={{ textAlign: 'center' }}>Cobrança anual pela loja do seu celular. Cancele quando quiser, sem multa.</Body>
+            <Button label="Assinatura disponível no lançamento" disabled />
+            <Body muted size={12} style={{ textAlign: 'center' }}>Fase de testes: peça à equipe um premium de teste. No lançamento, a cobrança anual será pela loja do seu celular, com cancelamento a qualquer momento.</Body>
           </>
-        ) : (
-          <View style={{ alignItems: 'center', gap: 14, paddingTop: 60 }}>
-            <GoldSurface width={72} style={{ width: 72, height: 72, borderRadius: 36, alignItems: 'center', justifyContent: 'center' }}><Crown size={30} /></GoldSurface>
-            <Title size={34} style={{ textAlign: 'center' }}>Bem-vinda ao Premium</Title>
-            <Body muted style={{ textAlign: 'center' }}>Agora você vê todas as babás da sua região, com taxa de serviço reduzida.</Body>
-            <Button label="Ver as babás" onPress={() => router.back()} />
-          </View>
         )}
       </ScrollView>
     </SafeAreaView>

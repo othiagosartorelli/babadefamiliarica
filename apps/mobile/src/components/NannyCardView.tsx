@@ -14,7 +14,7 @@ export function NannyCardView({ n, favorite, onFavorite, onSealInfo }: {
   return (
     <View style={[{ backgroundColor: colors.white, borderRadius: 24, padding: 14, flexDirection: 'row', gap: 14 }, shadow]}>
       <Pressable onPress={open} accessibilityRole="button" accessibilityLabel={`Ver perfil de ${n.name}`}>
-        <Portrait source={n.photo} width={98} height={130} radius={20} gilded={n.hasSeal} label={`Foto de ${n.name}`} />
+        <Portrait source={n.photo} uri={n.photoUri ?? undefined} width={98} height={130} radius={20} gilded={n.hasSeal} label={`Foto de ${n.name}`} />
       </Pressable>
       <View style={{ flex: 1, gap: 6 }}>
         <Pressable onPress={open} style={{ gap: 4, paddingRight: 36 }} accessibilityRole="button">

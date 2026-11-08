@@ -1,17 +1,16 @@
 import { useState } from 'react';
 import { ScrollView, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { SAMPLE_NANNIES } from '@/data/sample';
-import { useStore } from '@/lib/store';
+import { useNannyList } from '@/lib/useNannies';
 import { NannyCardView } from '@/components/NannyCardView';
 import { Body, SealInfoSheet, Title } from '@/components/ui';
 import { Heart } from '@/components/icons';
 import { colors } from '@/theme';
 
 export default function Favoritas() {
-  const { favorites, toggleFavorite } = useStore();
+  const { nannies, isFavorite, toggleFavorite } = useNannyList();
   const [info, setInfo] = useState(false);
-  const list = SAMPLE_NANNIES.filter((n) => favorites.has(n.id));
+  const list = nannies.filter((n) => isFavorite(n.id));
   return (
     <SafeAreaView edges={['top']} style={{ flex: 1, backgroundColor: colors.ivory }}>
       <ScrollView contentContainerStyle={{ padding: 20, gap: 14, flexGrow: 1 }}>

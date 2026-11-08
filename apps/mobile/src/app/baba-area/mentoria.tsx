@@ -7,7 +7,7 @@ import { Lock } from '@/components/icons';
 import { Body, Button, Strong, Title } from '@/components/ui';
 import { colors, shadow } from '@/theme';
 
-const CHECKOUT = process.env.EXPO_PUBLIC_GREENN_CHECKOUT_URL;
+import { GREENN_CHECKOUT_URL as CHECKOUT } from '@/lib/config';
 
 export default function Mentoria() {
   const comprar = () => {

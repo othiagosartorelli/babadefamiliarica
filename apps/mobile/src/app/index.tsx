@@ -1,5 +1,6 @@
 // Boas-vindas: a pessoa escolhe se é mãe ou babá.
-import { router } from 'expo-router';
+import { Redirect, router, useLocalSearchParams } from 'expo-router';
+import { homeFor, useAuth } from '@/lib/auth';
 import { Pressable, ScrollView, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Body, Title } from '@/components/ui';
@@ -25,6 +26,11 @@ function RoleCard({ title, text, bg, icon, onPress }: { title: string; text: str
 }
 
 export default function Welcome() {
+  const { session, profile, profileReady } = useAuth();
+  const { papel } = useLocalSearchParams<{ papel?: string }>();
+  if (session && !profileReady) return <View style={{ flex: 1, backgroundColor: colors.ivory }} />;
+  if (session && profile) return <Redirect href={homeFor(profile.role)} />;
+  if (session && !profile) return <Redirect href={{ pathname: '/cadastro', params: papel ? { papel } : {} }} />;
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: colors.ivory }}>
       <ScrollView contentContainerStyle={{ flexGrow: 1, padding: 24, paddingTop: 40 }}>
@@ -42,10 +48,13 @@ export default function Welcome() {
         </View>
 
         <View style={{ marginTop: 28, gap: 14 }}>
-          <RoleCard title="Sou mãe" text="Quero encontrar uma babá com postura para a minha família" bg={colors.rose} icon={<Search size={26} />} onPress={() => router.push('/mae/buscar')} />
-          <RoleCard title="Sou babá" text="Quero receber propostas de famílias que valorizam o meu trabalho" bg={colors.nude} icon={<Heart size={26} />} onPress={() => router.push('/baba-area/propostas')} />
+          <RoleCard title="Sou mãe" text="Quero encontrar uma babá com postura para a minha família" bg={colors.rose} icon={<Search size={26} />} onPress={() => router.push({ pathname: '/entrar', params: { papel: 'mae' } })} />
+          <RoleCard title="Sou babá" text="Quero receber propostas de famílias que valorizam o meu trabalho" bg={colors.nude} icon={<Heart size={26} />} onPress={() => router.push({ pathname: '/entrar', params: { papel: 'baba' } })} />
         </View>
 
+        <Pressable onPress={() => router.push('/entrar')} accessibilityRole="button" style={{ alignSelf: 'center', padding: 14, marginTop: 18 }}>
+          <Body muted size={15}>Já tem conta? <Text style={{ fontFamily: fonts.semibold, color: colors.plum }}>Entrar</Text></Body>
+        </Pressable>
         <View style={{ flex: 1 }} />
         <Body muted size={12} style={{ textAlign: 'center', marginTop: 32 }}>
           Ao continuar, você aceita os Termos de uso, a Política de privacidade e o Termo de confidencialidade.

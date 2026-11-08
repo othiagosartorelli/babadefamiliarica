@@ -15,7 +15,9 @@ export type NannyCard = {
   bio: string;
   tags: string[];
   hourlyRateCents: number;
-  photo: number;
+  photo?: number;
+  photoUri?: string | null;
+  live?: boolean;
   checks: { label: string; date: string }[];
   criteria: { label: string; value: number }[];
 };

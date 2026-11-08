@@ -4,8 +4,9 @@ import { Pressable, ScrollView, View } from 'react-native';
 import { router, useLocalSearchParams } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { computeFees, formatBRL } from '@bfr/shared';
-import { SAMPLE_NANNIES } from '@/data/sample';
-import { useStore } from '@/lib/store';
+import { useAuth } from '@/lib/auth';
+import { openConversation } from '@/lib/data';
+import { useNanny } from '@/lib/useNannies';
 import { Back, Check, Lock } from '@/components/icons';
 import { Body, Button, Strong, Title } from '@/components/ui';
 import { colors, shadow } from '@/theme';
@@ -14,12 +15,18 @@ const METHODS = ['Pix', 'Cartão', 'Apple Pay'] as const;
 
 export default function Proposta() {
   const { id } = useLocalSearchParams<{ id: string }>();
-  const n = SAMPLE_NANNIES.find((x) => x.id === id) ?? SAMPLE_NANNIES[0];
-  const { isPremium } = useStore();
+  const n = useNanny(id);
+  const { isPremium, session } = useAuth();
   const [method, setMethod] = useState<(typeof METHODS)[number]>('Pix');
   const [paid, setPaid] = useState(false);
   const hours = 4;
-  const fees = computeFees({ hourlyRateCents: n.hourlyRateCents, hours, isRehire: false, familyIsPremium: isPremium });
+  if (!n) return <View style={{ flex: 1, backgroundColor: colors.ivory }} />;
+  const fees = computeFees({ hourlyRateCents: n.hourlyRateCents || 1, hours, isRehire: false, familyIsPremium: isPremium });
+  const openChat = async () => {
+    if (n.id.startsWith('exemplo-') || !session) return router.replace({ pathname: '/chat/[id]', params: { id: n.id } });
+    const conv = await openConversation(session.user.id, n.id);
+    if (conv) router.replace({ pathname: '/chat/[id]', params: { id: conv } });
+  };
 
   if (paid) {
     return (
@@ -27,7 +34,7 @@ export default function Proposta() {
         <View style={{ width: 76, height: 76, borderRadius: 38, backgroundColor: colors.greenBg, alignItems: 'center', justifyContent: 'center' }}><Check size={34} /></View>
         <Title size={34} style={{ textAlign: 'center' }}>Tudo certo para sábado</Title>
         <Body muted style={{ textAlign: 'center' }}>A {n.name.split(' ')[0]} já recebeu a confirmação. Combine os detalhes pelo chat do app.</Body>
-        <Button label="Abrir o chat" onPress={() => router.replace({ pathname: '/chat/[id]', params: { id: n.id } })} />
+        <Button label="Abrir o chat" onPress={openChat} />
       </SafeAreaView>
     );
   }
@@ -69,6 +76,9 @@ export default function Proposta() {
           <Body muted size={13}>O valor fica guardado e só é liberado para a {n.name.split(' ')[0]} depois do atendimento.</Body>
         </View>
 
+        <View style={{ backgroundColor: '#FFF8E8', borderWidth: 1, borderColor: '#E8D29E', borderRadius: 16, padding: 12 }}>
+          <Body size={13}>Fase de testes: o pagamento ainda é simulado e nada é cobrado.</Body>
+        </View>
         <Body muted size={13}>
           Cancelamento grátis até 48h antes. Depois, 50% vai para a babá; a menos de 24h, 100%. O contato direto é liberado quando o prazo de cancelamento grátis termina.
         </Body>

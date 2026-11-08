@@ -3,10 +3,12 @@
 // Penalidade automática (sem revisão humana no dia a dia):
 //   1ª e 2ª ocorrência em 30 dias → aviso; 3ª → suspensão de 7 dias; 5ª → banimento.
 //   A pessoa pode pedir revisão uma vez (tabela appeals), que cai no painel da Ana.
-import { adminClient, userClient, json } from '../_shared/admin.ts';
+import { adminClient, userClient, json, preflight } from '../_shared/admin.ts';
 import { checkMessage } from '../_shared/contactGuard.ts';
 
 Deno.serve(async (req) => {
+  const pf = preflight(req);
+  if (pf) return pf;
   if (req.method !== 'POST') return json({ error: 'método não permitido' }, 405);
 
   const { data: auth } = await userClient(req).auth.getUser();

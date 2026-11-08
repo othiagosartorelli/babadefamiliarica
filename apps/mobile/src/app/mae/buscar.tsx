@@ -4,8 +4,8 @@ import { Pressable, ScrollView, Text, View } from 'react-native';
 import { router } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { BlurView } from 'expo-blur';
-import { SAMPLE_NANNIES, TOTAL_IN_REGION_PLACEHOLDER } from '@/data/sample';
-import { useStore } from '@/lib/store';
+import { useAuth } from '@/lib/auth';
+import { useNannyList } from '@/lib/useNannies';
 import { NannyCardView } from '@/components/NannyCardView';
 import { Body, Button, Chip, SealInfoSheet, Title } from '@/components/ui';
 import { GoldSurface } from '@/components/Gold';
@@ -13,17 +13,17 @@ import { Calendar, Crown, Lock } from '@/components/icons';
 import { colors, fonts, shadow } from '@/theme';
 
 export default function Buscar() {
-  const { favorites, toggleFavorite, isPremium } = useStore();
+  const { profile } = useAuth();
+  const { nannies, loading, isPremium, isFavorite, toggleFavorite } = useNannyList();
   const [sealOnly, setSealOnly] = useState(false);
   const [info, setInfo] = useState(false);
-  const list = SAMPLE_NANNIES.filter((n) => !sealOnly || n.hasSeal);
-  const hidden = TOTAL_IN_REGION_PLACEHOLDER - SAMPLE_NANNIES.length;
+  const list = nannies.filter((n) => !sealOnly || n.hasSeal);
 
   return (
     <SafeAreaView edges={['top']} style={{ flex: 1, backgroundColor: colors.ivory }}>
       <ScrollView contentContainerStyle={{ padding: 20, gap: 14 }} stickyHeaderIndices={[]}>
         <View style={{ gap: 2 }}>
-          <Body muted size={14}>Olá, Carolina</Body>
+          <Body muted size={14}>Olá, {profile?.first_name ?? 'tudo bem'}</Body>
           <Title size={30}>Quem vai cuidar com você?</Title>
         </View>
 
@@ -53,11 +53,11 @@ export default function Buscar() {
         </ScrollView>
 
         <Body muted size={13}>
-          {isPremium ? `${list.length} babás disponíveis` : `Perfis de exemplo · ${list.length} de ${TOTAL_IN_REGION_PLACEHOLDER} babás na sua região`}
+          {loading ? 'Carregando…' : isPremium ? `${list.length} babás disponíveis` : 'Perfis de exemplo · assine para ver todas as babás da sua região'}
         </Body>
 
         {list.map((n) => (
-          <NannyCardView key={n.id} n={n} favorite={favorites.has(n.id)} onFavorite={() => toggleFavorite(n.id)} onSealInfo={() => setInfo(true)} />
+          <NannyCardView key={n.id} n={n} favorite={isFavorite(n.id)} onFavorite={() => toggleFavorite(n.id)} onSealInfo={() => setInfo(true)} />
         ))}
 
         {!isPremium && (
@@ -68,7 +68,7 @@ export default function Buscar() {
             </View>
             <BlurView intensity={30} tint="light" style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, alignItems: 'center', justifyContent: 'center', gap: 10, padding: 20 }}>
               <View style={{ width: 44, height: 44, borderRadius: 22, backgroundColor: colors.plum, alignItems: 'center', justifyContent: 'center' }}><Lock color="#E9D3A6" /></View>
-              <Title size={24} style={{ textAlign: 'center' }}>Mais {hidden} babás disponíveis no seu dia</Title>
+              <Title size={24} style={{ textAlign: 'center' }}>Veja todas as babás disponíveis no seu dia</Title>
               <Button label="Desbloquear todas" onPress={() => router.push('/premium')} />
             </BlurView>
           </View>

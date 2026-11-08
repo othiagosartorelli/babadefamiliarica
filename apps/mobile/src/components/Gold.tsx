@@ -97,7 +97,7 @@ export function Portrait({ uri, source, width, height, radius, gilded, label }: 
 }) {
   const img = (
     <Image
-      source={source ?? { uri }}
+      source={source ?? (uri ? { uri } : undefined)}
       accessibilityLabel={label}
       contentFit="cover"
       style={{ width: gilded ? width - 6 : width, height: gilded ? height - 6 : height, borderRadius: gilded ? radius - 3 : radius, borderWidth: gilded ? 2 : 0, borderColor: colors.white, backgroundColor: colors.rose }}
