@@ -17,6 +17,7 @@ export default function Cadastro() {
   const [fullName, setFullName] = useState('');
   const [city, setCity] = useState('');
   const [neighborhood, setNeighborhood] = useState('');
+  const [phone, setPhone] = useState('');
   const [rate, setRate] = useState('');
   const [bio, setBio] = useState('');
   const [accepted, setAccepted] = useState(false);
@@ -29,6 +30,8 @@ export default function Cadastro() {
     const name = fullName.trim().replace(/\s+/g, ' ');
     if (name.split(' ').length < 2) return setError('Escreva nome e sobrenome.');
     if (!city.trim()) return setError('Informe sua cidade.');
+    const phoneDigits = phone.replace(/\D/g, '');
+    if (phoneDigits.length < 10 || phoneDigits.length > 11) return setError('Informe seu WhatsApp com DDD.');
     const rateCents = Math.round(parseFloat(rate.replace(',', '.')) * 100);
     if (role === 'baba' && !(rateCents > 0)) return setError('Informe seu valor por hora.');
     if (!accepted) return setError('Para continuar, aceite os termos.');
@@ -44,6 +47,7 @@ export default function Cadastro() {
       ? await supabase.from('mothers').insert({ id: uid })
       : await supabase.from('nannies').insert({ id: uid, hourly_rate_cents: rateCents, bio: bio.trim() || null, modalities: ['avulso'] });
     if (e2 && !e2.message.includes('duplicate')) { setBusy(false); return setError(friendlyError(e2.message)); }
+    await supabase.from('profile_contacts').upsert({ user_id: uid, phone: phoneDigits, whatsapp: phoneDigits });
     if (role === 'baba') {
       // E-mail guardado em privado: liga o selo se ela já comprou a mentoria na Greenn.
       await supabase.from('nanny_private').upsert({ nanny_id: uid, email_lower: session.user.email?.toLowerCase() ?? null });
@@ -63,6 +67,7 @@ export default function Cadastro() {
             <Chip label="Sou babá" active={role === 'baba'} onPress={() => setRole('baba')} />
           </View>
           <Field label="Nome e sobrenome" value={fullName} onChangeText={setFullName} autoComplete="name" textContentType="name" />
+          <Field label="WhatsApp com DDD" value={phone} onChangeText={setPhone} keyboardType="phone-pad" autoComplete="tel" textContentType="telephoneNumber" placeholder="(11) 90000-0000" hint="Só aparece para a outra pessoa depois que a contratação for paga e passar o prazo de cancelamento." />
           <Field label="Cidade" value={city} onChangeText={setCity} placeholder="Ex.: São Paulo" />
           <Field label={role === 'baba' ? 'Bairros que você atende' : 'Bairro'} value={neighborhood} onChangeText={setNeighborhood} placeholder={role === 'baba' ? 'Ex.: Pinheiros, Jardins' : 'Ex.: Jardins'} />
           {role === 'mae' && <Body muted size={13}>Seu perfil não aparece em buscas. Só a babá que você chamar vê seu nome.</Body>}

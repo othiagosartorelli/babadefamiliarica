@@ -136,4 +136,62 @@ insert into public.nanny_private (nanny_id, email_lower) values ('00000000-0000-
 select pg_temp.expect('selo ligado pela compra pendente', (select count(*) from mentorship_seals where nanny_id = '00000000-0000-0000-0000-0000000000b2' and active), 1);
 rollback;
 
+-- 10. Fluxo completo da contratação
+begin;
+update public.nannies set is_published = true where id = '00000000-0000-0000-0000-0000000000b2';
+select pg_temp.as_user('00000000-0000-0000-0000-0000000000c2');
+create temp table t_b as select public.create_proposal('00000000-0000-0000-0000-0000000000b2', now() + interval '2 hours', now() + interval '6 hours', 2, '{1,4}', 'Jardins, São Paulo', 'Rua Teste, 10') as id;
+select pg_temp.expect('proposta criada com taxa premium (5%) e urgência', (select count(*) from bookings where id = (select id from t_b) and service_cents = 22000 and family_fee_cents = 1100 and urgent_fee_cents = 1100 and nanny_fee_cents = 2640), 1);
+select pg_temp.as_user('00000000-0000-0000-0000-0000000000b2');
+select pg_temp.expect('babá não vê endereço antes de aceitar e ser paga', (select count(*) from booking_private where booking_id = (select id from t_b)), 0);
+select public.respond_proposal((select id from t_b), true);
+select pg_temp.as_user('00000000-0000-0000-0000-0000000000c2');
+select pg_temp.expect('mãe não vê telefone antes de pagar', (select count(*) from profile_contacts where user_id = '00000000-0000-0000-0000-0000000000b2'), 0);
+select public.pay_booking_test((select id from t_b));
+select pg_temp.expect('pago dentro das 48h libera contato na hora', (select count(*) from bookings where id = (select id from t_b) and status = 'paga' and contact_unlock_at <= now()), 1);
+select pg_temp.as_user('00000000-0000-0000-0000-0000000000b2');
+select pg_temp.expect('babá vê o endereço no dia', (select count(*) from booking_private where booking_id = (select id from t_b)), 1);
+select public.check_in((select id from t_b), -23.56, -46.66);
+select public.check_out((select id from t_b));
+select pg_temp.expect('atendimento concluído', (select count(*) from bookings where id = (select id from t_b) and status = 'concluida'), 1);
+select pg_temp.as_user('00000000-0000-0000-0000-0000000000c2');
+insert into nanny_reviews (booking_id, mother_id, nanny_id, care, punctuality, communication, posture, presentation, comment)
+values ((select id from t_b), '00000000-0000-0000-0000-0000000000c2', '00000000-0000-0000-0000-0000000000b2', 5,5,5,5,5, 'Muito pontual, cuidadosa e as crianças amaram a noite.');
+select pg_temp.as_user('00000000-0000-0000-0000-0000000000b2');
+insert into family_reviews (booking_id, nanny_id, mother_id, rating, tags) values ((select id from t_b), '00000000-0000-0000-0000-0000000000b2', '00000000-0000-0000-0000-0000000000c2', 5, '{pagamento-em-dia}');
+select pg_temp.expect('nota recalculada após revelação', (select count(*) from nannies where id = '00000000-0000-0000-0000-0000000000b2' and review_count = 1 and rating is not null and level = 'nova' and ranking_score > 0), 1);
+do $$ begin
+  begin
+    perform public.pay_booking_test((select id from t_b));
+    raise exception 'FALHOU: pagou duas vezes';
+  exception when raise_exception then
+    if sqlerrm like 'FALHOU%' then raise; end if;
+    raise notice 'ok: não paga duas vezes';
+  end;
+end $$;
+rollback;
+
+-- 11. Outra mãe não mexe na contratação; cancelamento com menos de 24h paga 100% à babá
+begin;
+update public.nannies set is_published = true where id = '00000000-0000-0000-0000-0000000000b2';
+select pg_temp.as_user('00000000-0000-0000-0000-0000000000c2');
+create temp table t_c as select public.create_proposal('00000000-0000-0000-0000-0000000000b2', now() + interval '3 hours', now() + interval '5 hours', 1, '{2}', 'Moema', 'Rua X, 1') as id;
+select pg_temp.as_user('00000000-0000-0000-0000-0000000000c1');
+do $$ begin
+  begin
+    perform public.pay_booking_test((select id from t_c));
+    raise exception 'FALHOU: outra mãe pagou';
+  exception when raise_exception then
+    if sqlerrm like 'FALHOU%' then raise; end if;
+    raise notice 'ok: outra mãe não mexe na contratação';
+  end;
+end $$;
+select pg_temp.as_user('00000000-0000-0000-0000-0000000000b2');
+select public.respond_proposal((select id from t_c), true);
+select pg_temp.as_user('00000000-0000-0000-0000-0000000000c2');
+select public.pay_booking_test((select id from t_c));
+select public.cancel_booking((select id from t_c));
+select pg_temp.expect('cancelamento em cima da hora: 100% para a babá', (select count(*) from bookings where id = (select id from t_c) and status = 'cancelada' and nanny_cancel_share_cents = service_cents), 1);
+rollback;
+
 \echo TODOS OS TESTES PASSARAM

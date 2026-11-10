@@ -30,7 +30,8 @@ export default function Conta() {
         <View style={[{ backgroundColor: colors.white, borderRadius: 22, overflow: 'hidden' }, shadow]}>
           <Row title="Cidade" detail={[profile?.neighborhood, profile?.city].filter(Boolean).join(' · ') || 'Não informada'} />
           <Row title="Premium" detail={isPremium ? `Ativo até ${new Date(premiumUntil!).toLocaleDateString('pt-BR')}` : 'Não assinado'} onPress={() => router.push('/premium')} />
-          <Row title="Verificação" detail="Documento, selfie e comprovante: pedimos na hora de contratar" />
+          <Row title="Contratações" detail="Propostas, pagamentos, avaliações" onPress={() => router.push('/contratacoes')} />
+          <Row title="Verificação" detail="Documento, selfie e comprovante de residência" onPress={() => router.push('/verificacao')} />
           <Row title="Termos, privacidade e confidencialidade" detail="Aceitos no cadastro" />
         </View>
         <Pressable onPress={async () => { await signOut(); router.replace('/'); }} accessibilityRole="button" style={{ alignSelf: 'center', padding: 12 }}>

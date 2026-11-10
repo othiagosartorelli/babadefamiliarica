@@ -86,6 +86,20 @@ export default function Perfil() {
           </Body>
         </View>
 
+        <View style={[{ backgroundColor: colors.white, borderRadius: 22, overflow: 'hidden' }, shadow]}>
+          {[
+            { t: 'Verificação completa', d: 'Documento, antecedentes e endereço', to: '/verificacao' },
+            { t: 'Contratações', d: 'Propostas, atendimentos e avaliações', to: '/contratacoes' },
+            { t: 'Ganhos', d: 'Recebidos e a receber', to: '/ganhos' },
+            { t: 'Meu nível', d: 'Nova, Prata, Ouro, Elite', to: '/nivel' }
+          ].map((r) => (
+            <Pressable key={r.t} onPress={() => router.push(r.to as never)} accessibilityRole="button" style={{ minHeight: 56, paddingHorizontal: 16, justifyContent: 'center', borderBottomWidth: 1, borderBottomColor: colors.line }}>
+              <Strong size={15}>{r.t}</Strong>
+              <Body muted size={13}>{r.d}</Body>
+            </Pressable>
+          ))}
+        </View>
+
         <View style={[{ backgroundColor: colors.white, borderRadius: 22, padding: 18, gap: 14, alignItems: 'center' }, shadow]}>
           <Portrait uri={photo ?? undefined} width={130} height={170} radius={24} gilded={hasSeal} label="Sua foto de perfil" />
           {hasSeal && <GoldSeal />}

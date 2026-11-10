@@ -27,7 +27,21 @@
       "expo-router",
       "expo-font",
       "expo-image",
-      "expo-secure-store"
+      "expo-secure-store",
+      [
+        "expo-location",
+        {
+          "locationWhenInUsePermission": "Usamos sua localização só para registrar a entrada no atendimento."
+        }
+      ],
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "Para escolher sua foto de perfil e enviar documentos.",
+          "cameraPermission": "Para tirar a selfie e fotografar documentos da verificação."
+        }
+      ],
+      "expo-video"
     ],
     "scheme": "babafamiliarica",
     "experiments": {
