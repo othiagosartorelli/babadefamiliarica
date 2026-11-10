@@ -10,6 +10,8 @@ const NAV = [
   { href: "/", label: "Visão geral" },
   { href: "/babas", label: "Babás" },
   { href: "/maes", label: "Mães" },
+  { href: "/verificacoes", label: "Verificações" },
+  { href: "/contratacoes", label: "Contratações" },
   { href: "/selos", label: "Selos e Greenn" },
   { href: "/revisoes", label: "Pedidos de revisão" },
   { href: "/conteudos", label: "Conteúdos" },

@@ -14,6 +14,7 @@ type Counts = {
   premium: number;
   appeals: number;
   conversations: number;
+  verifications: number;
 };
 
 async function loadCounts(): Promise<Counts> {
@@ -28,11 +29,12 @@ async function loadCounts(): Promise<Counts> {
     sb.from("mothers").select("id", head).gt("premium_until", now),
     sb.from("appeals").select("id", head).eq("status", "aberto"),
     sb.from("conversations").select("id", head),
+    sb.from("verifications").select("id", head).eq("status", "pendente"),
   ]);
   const failed = results.find((r) => r.error);
   if (failed?.error) throw failed.error;
-  const [published, waiting, seals, mothers, premium, appeals, conversations] = results.map((r) => r.count ?? 0);
-  return { published, waiting, seals, mothers, premium, appeals, conversations };
+  const [published, waiting, seals, mothers, premium, appeals, conversations, verifications] = results.map((r) => r.count ?? 0);
+  return { published, waiting, seals, mothers, premium, appeals, conversations, verifications };
 }
 
 export function Overview() {
@@ -56,6 +58,13 @@ export function Overview() {
       href: "/revisoes",
       hint: "Esperando sua decisão",
       highlight: (data?.appeals ?? 0) > 0,
+    },
+    {
+      label: "Verificações pendentes",
+      value: data?.verifications,
+      href: "/verificacoes",
+      hint: "Documentos para conferir",
+      highlight: (data?.verifications ?? 0) > 0,
     },
     { label: "Conversas", value: data?.conversations, hint: "Entre mães e babás" },
   ];
