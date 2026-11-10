@@ -10,9 +10,10 @@ App que conecta mães de famílias de alto padrão a babás com postura, com o s
 | `packages/shared` | Regras de negócio usadas no app e no servidor: bloqueio de contato no chat, taxas, cancelamento, ranking |
 | `supabase/migrations` | Banco de dados (Postgres) com as regras de privacidade (Row Level Security) |
 | `supabase/functions` | Funções de servidor: `send-message` (chat com bloqueio) e `greenn-webhook` (selo da mentoria) |
-| `supabase/tests` | Testes das regras de privacidade num Postgres comum |
+| `supabase/tests` | Testes das regras de privacidade e do fluxo de contratação num Postgres comum |
+| `apps/painel` | Painel web da Ana (Next.js): babás, mães, verificações, contratações, selos, revisões, conteúdos, ranking, financeiro |
 
-O painel web da Ana (Next.js) é a próxima etapa.
+Supabase do projeto: `https://lhrvwkovsfkeqjicoxuk.supabase.co` (região São Paulo). Nas sessões do Claude, use o ambiente **babadefamiliarica**.
 
 ## Rodar o app
 
@@ -35,7 +36,7 @@ O app usa bibliotecas nativas fora do Expo Go (gradiente, desfoque, cofre seguro
 ## Testes
 
 ```bash
-cd packages/shared && npm test          # 11 testes: chat, taxas, cancelamento, ranking
+cd packages/shared && npm test          # 12 testes: chat, taxas, cancelamento, ranking
 ```
 
 Testes do banco (precisa de Postgres local):
@@ -43,7 +44,7 @@ Testes do banco (precisa de Postgres local):
 ```bash
 createdb bfr_test
 cat supabase/tests/supabase_stub.sql supabase/migrations/*.sql | psql -v ON_ERROR_STOP=1 -d bfr_test
-psql -d bfr_test < supabase/tests/rls_test.sql   # 19 testes de privacidade
+psql -d bfr_test < supabase/tests/rls_test.sql   # 30 testes: privacidade e contratação
 ```
 
 ## Subir o banco no Supabase
@@ -68,10 +69,16 @@ Na Greenn, configure o webhook para `https://<projeto>.supabase.co/functions/v1/
 - **Selo dourado**: ligado pelo webhook da Greenn (compra paga), retirado em reembolso ou chargeback; quem compra antes de ter conta ganha o selo ao se cadastrar com o mesmo CPF ou e-mail.
 - **Taxas**: 1ª contratação 12% da babá + 10% da família; recontratação 8% + 8%; mãe premium paga 5%.
 
+## Fluxo da contratação (avulsa)
+
+Proposta da mãe → aceite da babá (prazo de até 12h) → pagamento → contato liberado no fim do prazo de cancelamento grátis (48h antes) → endereço visível para a babá 12h antes → entrada (com localização) e saída → 48h para reclamação → repasse → avaliações de mão dupla, publicadas juntas → nota, nível e ranking recalculados sozinhos.
+
+Enquanto o sistema de pagamento não é contratado, o pagamento é **simulado** (`app_settings.pagamento_de_teste`, interruptor no Financeiro do painel). A função `mark_booking_paid` é o ponto onde o webhook do provedor (Asaas/Pagar.me) vai confirmar pagamentos reais.
+
 ## Pendências conhecidas
 
 - Formato real do webhook da Greenn: confirmar disparando um evento de teste (os campos são lidos de forma tolerante e o payload bruto fica salvo).
-- Integrações a contratar: pagamento com custódia (Asaas ou Pagar.me), verificação de identidade e antecedentes (CAF ou unico + Serpro), compras nas lojas (RevenueCat).
+- Integrações a contratar: pagamento com custódia (Asaas ou Pagar.me), verificação automática de identidade e antecedentes (CAF ou unico + Serpro; hoje a equipe confere os documentos no painel), compras nas lojas (RevenueCat), e-mail próprio (Resend) para login por código.
+- Publicação: painel na Vercel (raiz `apps/painel`, variáveis `NEXT_PUBLIC_BFR_*`) e app pelo EAS (Expo).
 - IA de moderação para casos ambíguos no chat (hoje: regras objetivas).
-- Painel web da Ana.
 - Parecer jurídico: termos de uso, LGPD, confidencialidade.
